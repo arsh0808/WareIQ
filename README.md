@@ -137,4 +137,4 @@ MIT License
 
 Contributions welcome! Please read our contributing guidelines first.
 ### 📦 Download Project
-👉 [Click here to download the full repository](https://github.com/arsh0808/WareIQ/archive/refs/heads/main.zip)
+👉 [Click here to download the full repository](https://github.com/arsh0808/WareIQ.zip)
