@@ -50,6 +50,11 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({ user, 
     router.push('/settings');
   };
 
+  const handleProfile = () => {
+    setIsOpen(false);
+    router.push('/profile');
+  };
+
   const getUserInitials = () => {
     if (user?.displayName) {
       return user.displayName
@@ -147,6 +152,15 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({ user, 
 
           {}
           <div className="py-2">
+            {}
+            <button
+              onClick={handleProfile}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              <User className="w-5 h-5" />
+              <span>My Profile</span>
+            </button>
+
             {}
             <button
               onClick={handleSettings}

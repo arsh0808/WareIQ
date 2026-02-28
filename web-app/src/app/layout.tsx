@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { Toaster } from 'sonner';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -20,15 +21,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider>
-          {children}
-          <Toaster 
-            position="top-right" 
-            expand={true}
-            richColors
-            closeButton
-          />
-        </ThemeProvider>
+        <ErrorBoundary>
+          <ThemeProvider>
+            {children}
+            <Toaster 
+              position="top-right" 
+              expand={true}
+              richColors
+              closeButton
+            />
+          </ThemeProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
