@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Bell, BellOff, Check, AlertTriangle, Info, X, Mail, Package, Users, Radio } from 'lucide-react';
-import toast from '@/lib/hooks/useToast';
+import { toast } from '@/lib/hooks/useToast';
 import { usePermission } from '@/components/PermissionGuard';
 
 interface Notification {

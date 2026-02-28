@@ -11,7 +11,7 @@ import { SearchInput } from '@/components/ui/SearchInput';
 import { Badge } from '@/components/ui/Badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
 import { Users, UserCheck, Download, Upload, Edit, Trash2, CheckSquare, Square } from 'lucide-react';
-import toast from '@/lib/hooks/useToast';
+import { toast } from '@/lib/hooks/useToast';
 import { RoleBadge } from '@/components/PermissionGuard';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/Dialog';
 import { Input } from '@/components/ui/Input';

@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
 import { TableSkeleton } from '@/components/ui/Skeleton';
 import { ClipboardList, Download, Shield, User, Package, Database } from 'lucide-react';
-import toast from '@/lib/hooks/useToast';
+import { toast } from '@/lib/hooks/useToast';
 import { exportToCSV } from '@/lib/utils/csvParser';
 
 interface AuditLog {

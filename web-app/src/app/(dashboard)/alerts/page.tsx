@@ -15,7 +15,7 @@ import {
   AlertTriangle, CheckCircle, Bell, BellOff, Filter, Download, 
   Package, Activity, Zap, ThermometerSun, Scale, Battery 
 } from 'lucide-react';
-import toast from '@/lib/hooks/useToast';
+import { toast } from '@/lib/hooks/useToast';
 import { exportToCSV } from '@/lib/utils/csvParser';
 import type { Alert, AlertType, AlertSeverity, Product } from '@/lib/types';
 

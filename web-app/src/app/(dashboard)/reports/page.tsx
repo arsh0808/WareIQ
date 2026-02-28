@@ -8,7 +8,7 @@ import { getUserRole, type UserRole } from '@/lib/firebase/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { FileText, Download, TrendingUp, Package, DollarSign, AlertTriangle, Calendar } from 'lucide-react';
-import toast from '@/lib/hooks/useToast';
+import { toast } from '@/lib/hooks/useToast';
 import { exportToCSV } from '@/lib/utils/csvParser';
 
 export default function ReportsPage() {

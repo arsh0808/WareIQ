@@ -7,7 +7,7 @@ import { FileUpload } from './ui/FileUpload';
 import { parseCSV, validateInventoryCSV, generateCSVTemplate } from '@/lib/utils/csvParser';
 import { collection, addDoc, writeBatch, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import toast from '@/lib/hooks/useToast';
+import { toast } from '@/lib/hooks/useToast';
 import { Download, Upload, AlertTriangle, CheckCircle, Loader } from 'lucide-react';
 
 interface BulkImportDialogProps {

@@ -6,7 +6,7 @@ import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import toast from '@/lib/hooks/useToast';
+import { toast } from '@/lib/hooks/useToast';
 import { Grid3x3 } from 'lucide-react';
 
 interface AddShelfDialogProps {

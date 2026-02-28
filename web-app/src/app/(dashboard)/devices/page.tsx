@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/Input';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { CardSkeleton } from '@/components/ui/Skeleton';
 import { Radio, Battery, Wifi, WifiOff, Plus, Copy, CheckCircle } from 'lucide-react';
-import toast from '@/lib/hooks/useToast';
+import { toast } from '@/lib/hooks/useToast';
 
 export default function DevicesPage() {
   const { user, userRole } = useAuth();

@@ -15,7 +15,7 @@ import { SearchInput } from '@/components/ui/SearchInput';
 import { DataTable, Column } from '@/components/ui/DataTable';
 import { CardSkeleton } from '@/components/ui/Skeleton';
 import { Warehouse as WarehouseIcon, MapPin, User, Package, Edit, Trash2, Plus, Building2 } from 'lucide-react';
-import toast from '@/lib/hooks/useToast';
+import { toast } from '@/lib/hooks/useToast';
 
 export default function WarehousesPage() {
   const { user, userRole } = useAuth();

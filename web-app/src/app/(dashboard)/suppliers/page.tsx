@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
 import { TableSkeleton } from '@/components/ui/Skeleton';
 import { Truck, Plus, Edit2, Trash2, Mail, Phone, MapPin, Download } from 'lucide-react';
-import toast from '@/lib/hooks/useToast';
+import { toast } from '@/lib/hooks/useToast';
 import { AddSupplierDialog } from '@/components/AddSupplierDialog';
 import { EditSupplierDialog } from '@/components/EditSupplierDialog';
 import { exportToCSV } from '@/lib/utils/csvParser';

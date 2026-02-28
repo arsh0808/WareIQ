@@ -20,7 +20,7 @@ import { AddInventoryDialog } from '@/components/AddInventoryDialog';
 import { BulkEditInventoryDialog } from '@/components/BulkEditInventoryDialog';
 import { InventoryHistoryDialog } from '@/components/InventoryHistoryDialog';
 import { exportToCSV } from '@/lib/utils/csvParser';
-import toast from '@/lib/hooks/useToast';
+import { toast } from '@/lib/hooks/useToast';
 import { trackInventoryDelete } from '@/lib/utils/inventoryHistory';
 import { usePermission } from '@/components/PermissionGuard';
 

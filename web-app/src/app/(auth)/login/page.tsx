@@ -6,7 +6,7 @@ import { signInWithGoogle } from '@/lib/firebase/auth';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Warehouse } from 'lucide-react';
-import toast from '@/lib/hooks/useToast';
+import { toast } from '@/lib/hooks/useToast';
 
 export default function LoginPage() {
   const router = useRouter();

@@ -8,7 +8,7 @@ import { doc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
-import toast from '@/lib/hooks/useToast';
+import { toast } from '@/lib/hooks/useToast';
 import { UserPlus } from 'lucide-react';
 
 interface AddUserDialogProps {

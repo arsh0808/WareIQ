@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { doc, updateDoc, Timestamp, writeBatch } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import toast from '@/lib/hooks/useToast';
+import { toast } from '@/lib/hooks/useToast';
 import { Save, X, Package, AlertTriangle } from 'lucide-react';
 import type { Inventory, Product } from '@/lib/types';
 import { checkAndGenerateStockAlerts } from '@/lib/utils/alertGenerator';

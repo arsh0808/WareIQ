@@ -6,7 +6,7 @@ import { auth } from '@/lib/firebase/config';
 import { signOut } from 'firebase/auth';
 import { User, LogOut, Settings, ChevronDown } from 'lucide-react';
 import { Badge } from './ui/Badge';
-import toast from '@/lib/hooks/useToast';
+import { toast } from '@/lib/hooks/useToast';
 import type { UserRole } from '@/lib/firebase/auth';
 
 interface UserProfileDropdownProps {

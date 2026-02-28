@@ -12,7 +12,7 @@ import { Package, AlertTriangle, Radio, Bell, Plus, FileText, QrCode, Settings, 
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { BarcodeScanner } from '@/components/BarcodeScanner';
 import { useRouter } from 'next/navigation';
-import toast from '@/lib/hooks/useToast';
+import { toast } from '@/lib/hooks/useToast';
 import { usePermission, PermissionGuard } from '@/components/PermissionGuard';
 import { AdminSystemOverview, WarehouseOverviewWidget, UserActivityWidget } from '@/components/dashboard/AdminDashboardWidgets';
 import { StaffTaskList, RecentScansWidget } from '@/components/dashboard/StaffDashboardWidgets';

@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { User, Lock, Bell, Palette, Database, Shield } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
-import toast from '@/lib/hooks/useToast';
+import { toast } from '@/lib/hooks/useToast';
 
 export default function SettingsPage() {
   const [user, setUser] = useState<any>(null);

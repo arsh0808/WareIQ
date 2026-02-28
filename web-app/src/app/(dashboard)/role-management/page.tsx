@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
 import { TableSkeleton } from '@/components/ui/Skeleton';
 import { Shield, Users, Edit2, History, AlertCircle, TrendingUp, UserCog } from 'lucide-react';
-import toast from '@/lib/hooks/useToast';
+import { toast } from '@/lib/hooks/useToast';
 import { EditUserRoleDialog } from '@/components/EditUserRoleDialog';
 import { RoleBadge } from '@/components/PermissionGuard';
 import { StatCard } from '@/components/ui/StatCard';

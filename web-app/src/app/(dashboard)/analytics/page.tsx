@@ -16,7 +16,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
 } from 'recharts';
 import { exportToCSV } from '@/lib/utils/csvParser';
-import toast from '@/lib/hooks/useToast';
+import { toast } from '@/lib/hooks/useToast';
 import {
   getInventoryTrends,
   getActivityMetrics,

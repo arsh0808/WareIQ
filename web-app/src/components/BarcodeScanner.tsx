@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/Dialog';
 import { Button } from './ui/Button';
 import { Camera, X, Loader } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
-import toast from '@/lib/hooks/useToast';
+import { toast } from '@/lib/hooks/useToast';
 
 interface BarcodeScannerProps {
   open: boolean;
