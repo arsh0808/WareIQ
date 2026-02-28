@@ -35,6 +35,13 @@ export async function signUp(
 
     await updateProfile(userCredential.user, { displayName: name });
 
+    // Send email verification
+    const { sendEmailVerification } = await import('firebase/auth');
+    await sendEmailVerification(userCredential.user, {
+      url: `${window.location.origin}/dashboard`,
+      handleCodeInApp: false,
+    });
+
     await setDoc(doc(db, 'users', userCredential.user.uid), {
       email,
       name,
@@ -43,6 +50,7 @@ export async function signUp(
       photoURL: userCredential.user.photoURL || '',
       createdAt: new Date(),
       lastLogin: new Date(),
+      emailVerified: false,
     });
 
     return userCredential;

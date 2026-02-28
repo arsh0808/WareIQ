@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
 import Sidebar from '@/components/Sidebar';
 import { TopBar } from '@/components/TopBar';
+import { EmailVerificationBanner } from '@/components/EmailVerificationBanner';
 
 export default function DashboardLayout({
   children,
@@ -39,6 +40,7 @@ export default function DashboardLayout({
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar user={user} userRole={userRole} />
       <div className="flex-1 flex flex-col overflow-hidden">
+        {user && <EmailVerificationBanner user={user} />}
         <TopBar user={user} userRole={userRole} />
         <div className="flex-1 overflow-auto">
           {children}
