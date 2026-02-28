@@ -1,0 +1,56 @@
+{"users": [
+{
+  "localId": "3AHDEfPMjYbaspxsXTR7SzK5DvH3",
+  "email": "staff@warehouse.com",
+  "emailVerified": true,
+  "passwordHash": "zB5EQBNGspW12BtGbcLTCksMD348Qvm0cBACSe65jOPJk+UrtP/NQ9t/DCNplsVlAP47ydWyftQsL9EjfPMAJg==",
+  "salt": "UZVwNtlZ0YO0Og==",
+  "displayName": "Staff User",
+  "createdAt": "1770751293423",
+  "disabled": false,
+  "providerUserInfo": []
+},
+{
+  "localId": "9apqOalgZyfKo75eYSLLNLUYwJY2",
+  "email": "admin@warehouse.com",
+  "emailVerified": false,
+  "passwordHash": "z4BDd81CTV4PYdltC33OTWr9v1cllFCRR4/n8jNS6QzEAehpQfb8JXFELrKlyGX5uyaJETZG7OMnfDo581Xpmw==",
+  "salt": "o7W2joUDUkUBaw==",
+  "lastSignedInAt": "1772298613565",
+  "createdAt": "1770746708262",
+  "disabled": false,
+  "providerUserInfo": []
+},
+{
+  "localId": "LFJRiLeASRej1XETpgcCd96V4uz1",
+  "email": "viewer@warehouse.com",
+  "emailVerified": true,
+  "passwordHash": "EIAoWl/Of2TREfLLlDJD/4xIY+aNIpwruX9xpy383uuqlrZeKHnGbQTMhNtTJ/7EeBGRVQBwMIVgJ8XbfkCVPQ==",
+  "salt": "QYO0cNi1nnQU5Q==",
+  "displayName": "Viewer User",
+  "createdAt": "1770751294979",
+  "disabled": false,
+  "providerUserInfo": []
+},
+{
+  "localId": "M8jytdeOO8bCeL3p9dLd8SLkfjT2",
+  "email": "test@example.com",
+  "emailVerified": true,
+  "passwordHash": "Zypl67QlGHKJLxiVQOi35No2M5qevnjJ865smukRy4KTSZhpWBYAHpFkXU3qgG/Ww6GZTS2OKfuKHtAbcI9csg==",
+  "salt": "n43r+Kfa5NRHTg==",
+  "displayName": "Test User",
+  "createdAt": "1770751296532",
+  "disabled": false,
+  "providerUserInfo": []
+},
+{
+  "localId": "UDqtCZqNKxcyuq2dg75FGemggPz2",
+  "email": "manager@warehouse.com",
+  "emailVerified": true,
+  "passwordHash": "Vy0Lw9X3CRmwR3UchYllcecX4VP9FWOLeIE7p4+yVQpNXqbHPvVWCNqD0glsyxgEAgu54pB59rmTLFb+jakrwg==",
+  "salt": "+7zK0o6/siiVbg==",
+  "displayName": "Manager User",
+  "createdAt": "1770751291852",
+  "disabled": false,
+  "providerUserInfo": []
+}]}

@@ -1,0 +1,151 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================
+    // Helper Functions
+    // ============================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && getUserData().role == 'admin';
+    }
+    
+    function isManager() {
+      return isAuthenticated() && getUserData().role in ['admin', 'manager'];
+    }
+    
+    function isStaff() {
+      return isAuthenticated() && getUserData().role in ['admin', 'manager', 'staff'];
+    }
+    
+    function belongsToSameWarehouse(warehouseId) {
+      return isAuthenticated() && getUserData().warehouseId == warehouseId;
+    }
+    
+    // ============================================
+    // Users Collection
+    // ============================================
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin();
+      allow update: if isAdmin() || request.auth.uid == userId;
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // Warehouses Collection
+    // ============================================
+    match /warehouses/{warehouseId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin();
+      allow update: if isManager() && belongsToSameWarehouse(warehouseId);
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // Shelves Collection
+    // ============================================
+    match /shelves/{shelfId} {
+      allow read: if isAuthenticated();
+      allow create: if isManager();
+      allow update: if isManager() && belongsToSameWarehouse(resource.data.warehouseId);
+      allow delete: if isManager() && belongsToSameWarehouse(resource.data.warehouseId);
+    }
+    
+    // ============================================
+    // Products Collection
+    // ============================================
+    match /products/{productId} {
+      allow read: if isAuthenticated();
+      allow create: if isManager();
+      allow update: if isManager();
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // Inventory Collection
+    // ============================================
+    match /inventory/{inventoryId} {
+      allow read: if isAuthenticated();
+      allow create: if isStaff();
+      allow update: if isStaff() && belongsToSameWarehouse(resource.data.warehouseId);
+      allow delete: if isManager() && belongsToSameWarehouse(resource.data.warehouseId);
+    }
+    
+    // ============================================
+    // IoT Devices Collection
+    // ============================================
+    match /iot-devices/{deviceId} {
+      allow read: if isAuthenticated();
+      allow create: if isManager();
+      allow update: if isManager() && belongsToSameWarehouse(resource.data.warehouseId);
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // Alerts Collection
+    // ============================================
+    match /alerts/{alertId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isStaff();
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // Notifications Collection
+    // ============================================
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if false; // Only created by Cloud Functions
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+    
+    // ============================================
+    // Suppliers Collection
+    // ============================================
+    match /suppliers/{supplierId} {
+      allow read: if isAuthenticated();
+      allow create: if isManager();
+      allow update: if isManager();
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // Transactions Collection
+    // ============================================
+    match /transactions/{transactionId} {
+      allow read: if isAuthenticated();
+      allow create: if isStaff();
+      allow update: if isManager();
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // Inventory History Collection
+    // ============================================
+    match /inventory-history/{historyId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if false; // History records should not be updated
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // Audit Logs Collection
+    // ============================================
+    match /audit-logs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false; // Only Cloud Functions can write
+    }
+  }
+}

@@ -1,0 +1,21 @@
+supplier_id,supplier_name,contact_person,phone,city
+S001,Supplier_1 Pvt Ltd,Contact_1,9455984666,Bangalore
+S002,Supplier_2 Pvt Ltd,Contact_2,9111904768,Bangalore
+S003,Supplier_3 Pvt Ltd,Contact_3,9410949783,Noida
+S004,Supplier_4 Pvt Ltd,Contact_4,9101716459,Bangalore
+S005,Supplier_5 Pvt Ltd,Contact_5,9959210746,Mumbai
+S006,Supplier_6 Pvt Ltd,Contact_6,9634737956,Noida
+S007,Supplier_7 Pvt Ltd,Contact_7,9793245882,Noida
+S008,Supplier_8 Pvt Ltd,Contact_8,9495676969,Delhi
+S009,Supplier_9 Pvt Ltd,Contact_9,9809406032,Gurgaon
+S010,Supplier_10 Pvt Ltd,Contact_10,9990663700,Bangalore
+S011,Supplier_11 Pvt Ltd,Contact_11,9679344946,Noida
+S012,Supplier_12 Pvt Ltd,Contact_12,9431858954,Mumbai
+S013,Supplier_13 Pvt Ltd,Contact_13,9266321846,Bangalore
+S014,Supplier_14 Pvt Ltd,Contact_14,9871549077,Delhi
+S015,Supplier_15 Pvt Ltd,Contact_15,9987592590,Bangalore
+S016,Supplier_16 Pvt Ltd,Contact_16,9472982497,Delhi
+S017,Supplier_17 Pvt Ltd,Contact_17,9825616756,Chennai
+S018,Supplier_18 Pvt Ltd,Contact_18,9535683780,Delhi
+S019,Supplier_19 Pvt Ltd,Contact_19,9319061363,Gurgaon
+S020,Supplier_20 Pvt Ltd,Contact_20,9331261106,Mumbai

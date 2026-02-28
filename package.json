@@ -1,0 +1,39 @@
+{
+  "name": "smart-warehouse-iot",
+  "version": "1.0.0",
+  "description": "IoT-driven smart warehouse management system",
+  "private": true,
+  "workspaces": [
+    "web-app",
+    "firebase/functions",
+    "iot-simulator"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:web\" \"npm run dev:emulator\"",
+    "dev:web": "cd web-app && npm run dev",
+    "dev:emulator": "firebase emulators:start",
+    "build": "cd web-app && npm run build",
+    "deploy:vercel": "cd web-app && vercel --prod",
+    "deploy:firebase": "firebase deploy",
+    "setup": "npm run setup:web && npm run setup:functions && npm run setup:simulator",
+    "setup:web": "cd web-app && npm install",
+    "setup:functions": "cd firebase/functions && npm install",
+    "setup:simulator": "cd iot-simulator && npm install"
+  },
+  "keywords": [
+    "iot",
+    "warehouse",
+    "inventory",
+    "firebase",
+    "nextjs",
+    "vercel"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "next": "^16.1.6"
+  }
+}

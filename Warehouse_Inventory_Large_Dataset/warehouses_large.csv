@@ -1,0 +1,11 @@
+warehouse_id,warehouse_name,location,capacity
+W001,Warehouse_1,Bangalore,1347
+W002,Warehouse_2,Delhi,713
+W003,Warehouse_3,Gurgaon,1030
+W004,Warehouse_4,Gurgaon,1061
+W005,Warehouse_5,Chennai,785
+W006,Warehouse_6,Chennai,3504
+W007,Warehouse_7,Chennai,3734
+W008,Warehouse_8,Bangalore,2025
+W009,Warehouse_9,Delhi,937
+W010,Warehouse_10,Noida,3950

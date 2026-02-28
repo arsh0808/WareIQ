@@ -1,0 +1,47 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    
+    "sensor-data": {
+      "$deviceId": {
+        ".read": "auth != null",
+        ".write": "auth != null && root.child('device-permissions').child($deviceId).child(auth.uid).exists()",
+        "latest": {
+          ".validate": "newData.hasChildren(['timestamp'])"
+        },
+        "history": {
+          "$timestamp": {
+            ".validate": "newData.hasChildren(['timestamp'])",
+            ".write": "auth != null && root.child('device-permissions').child($deviceId).child(auth.uid).exists()"
+          }
+        }
+      }
+    },
+    
+    "device-status": {
+      "$deviceId": {
+        ".read": "auth != null",
+        ".write": "auth != null && root.child('device-permissions').child($deviceId).child(auth.uid).exists()",
+        ".validate": "newData.hasChildren(['online', 'lastSeen'])"
+      }
+    },
+    
+    "real-time-inventory": {
+      "$shelfId": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        ".validate": "newData.hasChildren(['currentWeight', 'lastUpdate'])"
+      }
+    },
+    
+    "device-permissions": {
+      "$deviceId": {
+        "$uid": {
+          ".read": "auth != null && auth.uid == $uid",
+          ".write": false
+        }
+      }
+    }
+  }
+}
