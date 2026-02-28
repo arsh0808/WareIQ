@@ -10,7 +10,8 @@ import {
   UserCredential,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from './config';
+// Use hardcoded config temporarily to bypass .env issues
+import { auth, db } from './config-hardcoded';
 
 export interface UserRole {
   uid: string;
