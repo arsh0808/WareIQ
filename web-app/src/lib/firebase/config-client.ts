@@ -15,6 +15,25 @@ const firebaseConfig = {
   databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
 };
 
+// Validate Firebase config
+const validateConfig = () => {
+  const required = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
+  const missing = required.filter(key => !firebaseConfig[key as keyof typeof firebaseConfig]);
+  
+  if (missing.length > 0) {
+    console.error('Missing Firebase config:', missing);
+    console.error('Current config:', {
+      apiKey: firebaseConfig.apiKey ? '✓' : '✗',
+      authDomain: firebaseConfig.authDomain ? '✓' : '✗',
+      projectId: firebaseConfig.projectId ? '✓' : '✗',
+      storageBucket: firebaseConfig.storageBucket ? '✓' : '✗',
+      messagingSenderId: firebaseConfig.messagingSenderId ? '✓' : '✗',
+      appId: firebaseConfig.appId ? '✓' : '✗',
+    });
+    throw new Error(`Firebase config incomplete. Missing: ${missing.join(', ')}`);
+  }
+};
+
 let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore;
@@ -22,16 +41,25 @@ let rtdb: Database;
 let storage: FirebaseStorage;
 
 if (typeof window !== 'undefined') {
-  if (!getApps().length) {
-    app = initializeApp(firebaseConfig);
-  } else {
-    app = getApps()[0];
+  try {
+    validateConfig();
+    
+    if (!getApps().length) {
+      app = initializeApp(firebaseConfig);
+      console.log('✓ Firebase initialized successfully');
+    } else {
+      app = getApps()[0];
+      console.log('✓ Firebase already initialized');
+    }
+    
+    auth = getAuth(app);
+    db = getFirestore(app);
+    rtdb = getDatabase(app);
+    storage = getStorage(app);
+  } catch (error) {
+    console.error('Firebase initialization error:', error);
+    throw error;
   }
-  
-  auth = getAuth(app);
-  db = getFirestore(app);
-  rtdb = getDatabase(app);
-  storage = getStorage(app);
 }
 
 export { app, auth, db, rtdb, storage };
