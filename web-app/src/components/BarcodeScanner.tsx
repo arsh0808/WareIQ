@@ -141,7 +141,14 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
               </label>
               <select
                 value={selectedCamera}
-                onChange={(e) => setSelectedCamera(e.target.value)}
+                onChange={async (e) => {
+                  const newCamera = e.target.value;
+                  setSelectedCamera(newCamera);
+                  if (scanning) {
+                    await stopScanning();
+                    setTimeout(() => startScanning(newCamera), 100);
+                  }
+                }}
                 className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
               >
                 {cameras.map((camera) => (
