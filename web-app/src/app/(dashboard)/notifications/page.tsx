@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Bell, BellOff, Check, AlertTriangle, Info, X, Mail, Package, Users, Radio } from 'lucide-react';
 import { toast } from '@/lib/hooks/useToast';
 import { usePermission } from '@/components/PermissionGuard';
+import { useData } from '@/lib/hooks/useData';
 
 interface Notification {
   id: string;
@@ -27,32 +28,18 @@ interface Notification {
 export default function NotificationsPage() {
   const { user, userRole } = useAuth();
   const permissions = usePermission(userRole);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
 
-  useEffect(() => {
-    if (!user) return;
+  const notificationsQuery = query(
+    collection(db, 'notifications'),
+    where('userId', '==', user?.uid || 'no-user'),
+    orderBy('createdAt', 'desc'),
+    limit(50)
+  );
 
-    const notificationsQuery = query(
-      collection(db, 'notifications'),
-      where('userId', '==', user.uid),
-      orderBy('createdAt', 'desc'),
-      limit(50)
-    );
+  const { data: notifications, loading, isDemoData } = useData<Notification>('notifications', notificationsQuery);
 
-    const unsubscribe = onSnapshot(notificationsQuery, (snapshot) => {
-      const notifs = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Notification[];
-
-      setNotifications(notifs);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [user]);
+  // useEffect for fetching moved to useData hook
 
   const filteredNotifications = notifications.filter(n => {
     if (filter === 'unread') return !n.read;
@@ -127,7 +114,7 @@ export default function NotificationsPage() {
                 <Bell className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Notifications
+                Alert & Notification Center
               </h1>
               {unreadCount > 0 && (
                 <Badge variant="danger" className="ml-2">
@@ -136,19 +123,31 @@ export default function NotificationsPage() {
               )}
             </div>
             <p className="text-gray-600 dark:text-gray-400">
-              Stay updated with important alerts and system notifications
+              Your unified inbox for system alerts, inventory updates, and messages
             </p>
           </div>
-          
-          {unreadCount > 0 && (
-            <Button
-              variant="outline"
-              leftIcon={<Check className="w-4 h-4" />}
-              onClick={handleMarkAllAsRead}
-            >
-              Mark all as read
-            </Button>
-          )}
+
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex gap-2">
+              {unreadCount > 0 && (
+                <Button
+                  variant="outline"
+                  leftIcon={<Check className="w-4 h-4" />}
+                  onClick={handleMarkAllAsRead}
+                >
+                  Mark all as read
+                </Button>
+              )}
+
+              <Button
+                variant="ghost"
+                className="text-blue-600 dark:text-blue-400"
+                onClick={() => window.location.href = '/alerts'}
+              >
+                Detailed Alert Log →
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Filters */}
@@ -180,7 +179,7 @@ export default function NotificationsPage() {
               {filter === 'unread' ? 'No unread notifications' : 'No notifications yet'}
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
-              {filter === 'unread' 
+              {filter === 'unread'
                 ? "You're all caught up! Check back later for updates."
                 : "Notifications will appear here when you have updates."}
             </p>
@@ -190,9 +189,8 @@ export default function NotificationsPage() {
             {filteredNotifications.map((notification) => (
               <Card
                 key={notification.id}
-                className={`p-4 hover:shadow-md transition-shadow cursor-pointer ${
-                  !notification.read ? 'bg-blue-50 dark:bg-blue-900/10 border-l-4 border-blue-500' : ''
-                }`}
+                className={`p-4 hover:shadow-md transition-shadow cursor-pointer ${!notification.read ? 'bg-blue-50 dark:bg-blue-900/10 border-l-4 border-blue-500' : ''
+                  }`}
                 onClick={() => {
                   if (!notification.read) {
                     handleMarkAsRead(notification.id);
@@ -203,7 +201,7 @@ export default function NotificationsPage() {
                   <div className="flex-shrink-0 mt-1">
                     {getNotificationIcon(notification.type)}
                   </div>
-                  
+
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
@@ -213,8 +211,15 @@ export default function NotificationsPage() {
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                           {notification.message}
                         </p>
+                        {notification.metadata?.shelfId && (
+                          <div className="mt-1">
+                            <Badge variant="outline" className="text-[10px]">
+                              Shelf: {notification.metadata.shelfId}
+                            </Badge>
+                          </div>
+                        )}
                       </div>
-                      
+
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-gray-500 dark:text-gray-500 whitespace-nowrap">
                           {formatDate(notification.createdAt)}
@@ -224,20 +229,45 @@ export default function NotificationsPage() {
                         )}
                       </div>
                     </div>
-                    
-                    {notification.link && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="mt-2"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          window.location.href = notification.link!;
-                        }}
-                      >
-                        View Details →
-                      </Button>
-                    )}
+
+                    <div className="flex gap-2 mt-3">
+                      {notification.link && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 text-xs bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.location.href = notification.link!;
+                          }}
+                        >
+                          View Impacted Item →
+                        </Button>
+                      )}
+                      {notification.metadata?.alertId && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 text-xs"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            try {
+                              await updateDoc(doc(db, 'alerts', notification.metadata.alertId), {
+                                resolved: true,
+                                resolvedBy: user?.uid,
+                                resolvedAt: new Date()
+                              });
+                              await handleMarkAsRead(notification.id);
+                              toast.success('Alert resolved directly from inbox');
+                            } catch (err) {
+                              toast.error('Failed to resolve alert');
+                            }
+                          }}
+                        >
+                          Quick Resolve
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </Card>
@@ -261,7 +291,7 @@ export default function NotificationsPage() {
                 </div>
               </div>
             </Card>
-            
+
             <Card className="p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
@@ -275,7 +305,7 @@ export default function NotificationsPage() {
                 </div>
               </div>
             </Card>
-            
+
             <Card className="p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
@@ -289,7 +319,7 @@ export default function NotificationsPage() {
                 </div>
               </div>
             </Card>
-            
+
             <Card className="p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">

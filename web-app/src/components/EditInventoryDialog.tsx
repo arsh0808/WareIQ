@@ -25,6 +25,12 @@ export function EditInventoryDialog({ open, onClose, inventoryItem, product, use
   const [minStockLevel, setMinStockLevel] = useState(inventoryItem.minStockLevel);
   const [maxStockLevel, setMaxStockLevel] = useState(inventoryItem.maxStockLevel);
   const [shelfId, setShelfId] = useState(inventoryItem.shelfId);
+  const [batchNumber, setBatchNumber] = useState(inventoryItem.batchNumber || '');
+  const [expiryDate, setExpiryDate] = useState(
+    inventoryItem.expiryDate
+      ? new Date((inventoryItem.expiryDate as any).toDate ? (inventoryItem.expiryDate as any).toDate() : (inventoryItem.expiryDate as any)).toISOString().split('T')[0]
+      : ''
+  );
   const [loading, setLoading] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -34,6 +40,12 @@ export function EditInventoryDialog({ open, onClose, inventoryItem, product, use
     setMinStockLevel(inventoryItem.minStockLevel);
     setMaxStockLevel(inventoryItem.maxStockLevel);
     setShelfId(inventoryItem.shelfId);
+    setBatchNumber(inventoryItem.batchNumber || '');
+    setExpiryDate(
+      inventoryItem.expiryDate
+        ? new Date((inventoryItem.expiryDate as any).toDate ? (inventoryItem.expiryDate as any).toDate() : (inventoryItem.expiryDate as any)).toISOString().split('T')[0]
+        : ''
+    );
     setValidationError(null);
   }, [inventoryItem]);
 
@@ -64,26 +76,28 @@ export function EditInventoryDialog({ open, onClose, inventoryItem, product, use
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setLoading(true);
-    
+
     try {
       const previousQuantity = inventoryItem.quantity;
       const inventoryRef = doc(db, 'inventory', inventoryItem.id);
-      
+
       const updateData = {
         quantity,
         minStockLevel,
         maxStockLevel,
         shelfId,
+        batchNumber: batchNumber || undefined,
+        expiryDate: expiryDate ? Timestamp.fromDate(new Date(expiryDate)) : undefined,
         lastUpdated: Timestamp.now(),
         updatedBy: userId,
       };
-      
+
       // Update inventory
       await updateDoc(inventoryRef, updateData);
 
@@ -119,7 +133,7 @@ export function EditInventoryDialog({ open, onClose, inventoryItem, product, use
       } else {
         toast.success('Inventory updated successfully', `Updated ${product?.name || 'product'} inventory`);
       }
-      
+
       onClose();
     } catch (error: any) {
       console.error('Error updating inventory:', error);
@@ -190,7 +204,7 @@ export function EditInventoryDialog({ open, onClose, inventoryItem, product, use
               </p>
             </div>
           </div>
-          
+
           {/* Live Stock Status Badge */}
           <div className={`mt-3 px-3 py-2 rounded-md flex items-center gap-2 ${stockStatus.color}`}>
             {stockStatus.icon}
@@ -229,6 +243,31 @@ export function EditInventoryDialog({ open, onClose, inventoryItem, product, use
               placeholder="e.g., A1-01"
               required
             />
+          </div>
+
+          {/* Batch Number and Expiry Date */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Batch Number
+              </label>
+              <Input
+                type="text"
+                value={batchNumber}
+                onChange={(e) => setBatchNumber(e.target.value)}
+                placeholder="BATCH-001"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Expiry Date
+              </label>
+              <Input
+                type="date"
+                value={expiryDate}
+                onChange={(e) => setExpiryDate(e.target.value)}
+              />
+            </div>
           </div>
 
           {/* Min/Max Stock Levels */}

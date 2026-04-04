@@ -1,0 +1,107 @@
+═══════════════════════════════════════════════════════════════
+  VERCEL ENVIRONMENT VARIABLES - COPY & PASTE
+═══════════════════════════════════════════════════════════════
+
+🎯 YOUR CORRECT FIREBASE VALUES ARE READY!
+
+Option 1: Vercel Dashboard (Paste these values)
+───────────────────────────────────────────────────────────────
+
+Go to: https://vercel.com/dashboard
+→ Select your project
+→ Settings → Environment Variables
+→ Add each variable below
+
+Variable 1:
+Name: NEXT_PUBLIC_FIREBASE_API_KEY
+Value: AIzaSyDNjxezQLIGIgWDRMDg63ukejFFisZvgAc
+
+Variable 2:
+Name: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+Value: wareiq-5f654.firebaseapp.com
+
+Variable 3:
+Name: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+Value: wareiq-5f654
+
+Variable 4:
+Name: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+Value: wareiq-5f654.firebasestorage.app
+
+Variable 5:
+Name: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+Value: 790490427408
+
+Variable 6:
+Name: NEXT_PUBLIC_FIREBASE_APP_ID
+Value: 1:790490427408:web:fc40eacb7c24233f125a95
+
+Variable 7:
+Name: NEXT_PUBLIC_FIREBASE_DATABASE_URL
+Value: https://wareiq-5f654-default-rtdb.firebaseio.com
+
+Variable 8:
+Name: NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+Value: G-25X5XW55QR
+
+✅ Select: Production, Preview, Development (all three)
+✅ Click "Save" for each variable
+✅ Then click "Redeploy" in Deployments tab
+
+═══════════════════════════════════════════════════════════════
+
+Option 2: Vercel CLI Commands (Copy & Paste All)
+───────────────────────────────────────────────────────────────
+
+# Install Vercel CLI
+npm i -g vercel
+
+# Login
+vercel login
+
+# Go to project
+cd web-app
+
+# Link project
+vercel link
+
+# Add variables (paste entire block)
+echo "AIzaSyDNjxezQLIGIgWDRMDg63ukejFFisZvgAc" | vercel env add NEXT_PUBLIC_FIREBASE_API_KEY production
+echo "wareiq-5f654.firebaseapp.com" | vercel env add NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN production
+echo "wareiq-5f654" | vercel env add NEXT_PUBLIC_FIREBASE_PROJECT_ID production
+echo "wareiq-5f654.firebasestorage.app" | vercel env add NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET production
+echo "790490427408" | vercel env add NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID production
+echo "1:790490427408:web:fc40eacb7c24233f125a95" | vercel env add NEXT_PUBLIC_FIREBASE_APP_ID production
+echo "https://wareiq-5f654-default-rtdb.firebaseio.com" | vercel env add NEXT_PUBLIC_FIREBASE_DATABASE_URL production
+echo "G-25X5XW55QR" | vercel env add NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID production
+
+# Deploy
+vercel --prod
+
+═══════════════════════════════════════════════════════════════
+
+Option 3: Git Push (If auto-deploy enabled)
+───────────────────────────────────────────────────────────────
+
+git add .
+git commit -m "Update Firebase config"
+git push
+
+═══════════════════════════════════════════════════════════════
+
+🔥 IMPORTANT NEXT STEP:
+───────────────────────────────────────────────────────────────
+
+After adding variables to Vercel, authorize your domain in Firebase:
+
+1. Go to: https://console.firebase.google.com/project/wareiq-5f654/authentication/settings
+2. Scroll to "Authorized domains"
+3. Click "Add domain"
+4. Add your Vercel URL (e.g., your-app.vercel.app)
+5. Click "Add"
+
+═══════════════════════════════════════════════════════════════
+
+✅ DONE! Your Vercel app should now work perfectly!
+
+═══════════════════════════════════════════════════════════════

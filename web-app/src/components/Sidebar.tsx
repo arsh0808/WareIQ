@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  Warehouse, 
-  Package, 
-  Radio, 
-  Bell, 
-  BarChart3, 
+import {
+  LayoutDashboard,
+  Warehouse,
+  Package,
+  Radio,
+  Bell,
+  BarChart3,
   Settings,
   ChevronLeft,
   Menu,
@@ -48,16 +48,16 @@ const navItems: NavItem[] = [
   { name: 'Products', href: '/products', icon: Box, allowedRoles: ['admin', 'manager', 'staff'] },
   { name: 'Shelves', href: '/shelves', icon: Grid3x3, allowedRoles: ['admin', 'manager', 'staff'] },
   { name: 'Suppliers', href: '/suppliers', icon: Truck, allowedRoles: ['admin', 'manager'] },
+  { name: 'Purchase Orders', href: '/purchase-orders', icon: FileText, allowedRoles: ['admin', 'manager'] },
   { name: 'Transactions', href: '/transactions', icon: RefreshCw, allowedRoles: ['admin', 'manager', 'staff'] },
   { name: 'Devices', href: '/devices', icon: Radio, allowedRoles: ['admin', 'manager'] },
-  { name: 'Alerts', href: '/alerts', icon: Bell, allowedRoles: ['admin', 'manager', 'staff'] },
   { name: 'Analytics', href: '/analytics', icon: BarChart3, allowedRoles: ['admin', 'manager'] },
   { name: 'Reports', href: '/reports', icon: FileText, allowedRoles: ['admin', 'manager', 'staff'] },
   { name: 'Users', href: '/users', icon: Users, allowedRoles: ['admin', 'manager'] },
   { name: 'Role Management', href: '/role-management', icon: Shield, allowedRoles: ['admin'] },
   { name: 'Bulk Operations', href: '/bulk-operations', icon: UserCheck, allowedRoles: ['admin'] },
   { name: 'System Health', href: '/system-health', icon: Activity, allowedRoles: ['admin'] },
-  { name: 'Notifications', href: '/notifications', icon: Bell, allowedRoles: ['admin', 'manager', 'staff', 'viewer'] },
+  { name: 'Alert Center', href: '/notifications', icon: Bell, allowedRoles: ['admin', 'manager', 'staff', 'viewer'] },
   { name: 'Audit Logs', href: '/audit-logs', icon: ClipboardList, allowedRoles: ['admin', 'manager'] },
 ];
 
@@ -110,7 +110,7 @@ export default function Sidebar({ user, userRole }: SidebarProps) {
     };
   }, []);
 
-  const SidebarContent = () => (
+  const sidebarContent = (
     <>
       {/* Header */}
       <div className={cn(
@@ -118,8 +118,8 @@ export default function Sidebar({ user, userRole }: SidebarProps) {
         collapsed ? "p-4" : "p-6"
       )}>
         <div className="flex items-center justify-between">
-          <Link 
-            href="/dashboard" 
+          <Link
+            href="/dashboard"
             className={cn(
               "flex items-center gap-3 transition-all duration-300 hover:opacity-80",
               collapsed && "justify-center"
@@ -157,7 +157,7 @@ export default function Sidebar({ user, userRole }: SidebarProps) {
           const Icon = item.icon;
           const isActive = pathname === item.href;
           const isHovered = hoveredItem === item.href;
-          
+
           return (
             <div key={item.href} className="relative">
               <Link
@@ -180,29 +180,29 @@ export default function Sidebar({ user, userRole }: SidebarProps) {
                     isHovered && "opacity-100"
                   )} />
                 )}
-                
+
                 <Icon className={cn(
                   'transition-all duration-300 relative z-10',
                   collapsed ? 'w-6 h-6' : 'w-5 h-5',
                   isActive ? 'scale-110' : 'group-hover:scale-110 group-hover:rotate-3'
                 )} />
-                
+
                 {!collapsed && (
                   <span className="font-medium transition-all duration-200 relative z-10">
                     {item.name}
                   </span>
                 )}
-                
+
                 {isActive && !collapsed && (
                   <div className="ml-auto w-2 h-2 bg-white rounded-full animate-pulse relative z-10" />
                 )}
-                
+
                 {/* Active indicator for collapsed state */}
                 {isActive && collapsed && (
                   <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-l-full" />
                 )}
               </Link>
-              
+
               {/* Tooltip for collapsed state */}
               {collapsed && isHovered && (
                 <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-lg shadow-xl whitespace-nowrap z-50 animate-in fade-in slide-in-from-left-2 duration-200">
@@ -246,7 +246,7 @@ export default function Sidebar({ user, userRole }: SidebarProps) {
 
   return (
     <>
-      {}
+      { }
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
         className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-white dark:bg-gray-800 shadow-lg"
@@ -254,7 +254,7 @@ export default function Sidebar({ user, userRole }: SidebarProps) {
         <Menu className="w-6 h-6 text-gray-700 dark:text-gray-300" />
       </button>
 
-      {}
+      { }
       {mobileOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black/50 z-40"
@@ -262,7 +262,7 @@ export default function Sidebar({ user, userRole }: SidebarProps) {
         />
       )}
 
-      {}
+      { }
       <aside
         className={cn(
           'lg:hidden fixed top-0 left-0 z-40 h-full w-72 bg-white dark:bg-gray-800 shadow-2xl transform transition-transform duration-300',
@@ -270,7 +270,7 @@ export default function Sidebar({ user, userRole }: SidebarProps) {
         )}
       >
         <div className="flex flex-col h-full">
-          <SidebarContent />
+          {sidebarContent}
         </div>
       </aside>
 
@@ -281,8 +281,8 @@ export default function Sidebar({ user, userRole }: SidebarProps) {
           collapsed ? 'w-20' : 'w-72'
         )}
       >
-        <SidebarContent />
-        
+        {sidebarContent}
+
         {/* Expand Button - Improved */}
         {collapsed && (
           <button

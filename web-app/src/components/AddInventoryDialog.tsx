@@ -26,6 +26,8 @@ export function AddInventoryDialog({ open, onClose, warehouseId, userId }: AddIn
   const [minStockLevel, setMinStockLevel] = useState(10);
   const [maxStockLevel, setMaxStockLevel] = useState(100);
   const [shelfId, setShelfId] = useState('');
+  const [batchNumber, setBatchNumber] = useState('');
+  const [expiryDate, setExpiryDate] = useState('');
   const [loading, setLoading] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -52,6 +54,8 @@ export function AddInventoryDialog({ open, onClose, warehouseId, userId }: AddIn
     setMinStockLevel(10);
     setMaxStockLevel(100);
     setShelfId('');
+    setBatchNumber('');
+    setExpiryDate('');
     setValidationError(null);
   };
 
@@ -86,16 +90,16 @@ export function AddInventoryDialog({ open, onClose, warehouseId, userId }: AddIn
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setLoading(true);
-    
+
     try {
       const selectedProduct = products.find(p => p.id === selectedProductId);
-      
+
       const inventoryData = {
         productId: selectedProductId,
         shelfId,
@@ -103,11 +107,13 @@ export function AddInventoryDialog({ open, onClose, warehouseId, userId }: AddIn
         quantity,
         minStockLevel,
         maxStockLevel,
+        batchNumber: batchNumber || null,
+        expiryDate: expiryDate ? Timestamp.fromDate(new Date(expiryDate)) : null,
         lastUpdated: Timestamp.now(),
         updatedBy: userId,
         status: 'available' as const,
       };
-      
+
       // Add inventory item
       const docRef = await addDoc(collection(db, 'inventory'), inventoryData);
 
@@ -140,7 +146,7 @@ export function AddInventoryDialog({ open, onClose, warehouseId, userId }: AddIn
       } else {
         toast.success('Inventory added successfully', `Added ${selectedProduct?.name || 'product'} to inventory`);
       }
-      
+
       resetForm();
       onClose();
     } catch (error: any) {
@@ -220,6 +226,31 @@ export function AddInventoryDialog({ open, onClose, warehouseId, userId }: AddIn
               placeholder="e.g., A1-01"
               required
             />
+          </div>
+
+          {/* Batch Number and Expiry Date */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Batch Number
+              </label>
+              <Input
+                type="text"
+                value={batchNumber}
+                onChange={(e) => setBatchNumber(e.target.value)}
+                placeholder="BATCH-001"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Expiry Date
+              </label>
+              <Input
+                type="date"
+                value={expiryDate}
+                onChange={(e) => setExpiryDate(e.target.value)}
+              />
+            </div>
           </div>
 
           {/* Min/Max Stock Levels */}

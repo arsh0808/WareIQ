@@ -94,7 +94,7 @@ export function formatAlertEmail(alert: Alert, productName?: string): { subject:
   };
 
   const subject = `${severityEmoji[alert.severity]} ${alert.severity.toUpperCase()}: ${alert.message}`;
-  
+
   const body = `
 Alert: ${alert.message}
 Severity: ${alert.severity.toUpperCase()}
@@ -219,11 +219,11 @@ export function formatAlertSMS(alert: Alert, productName?: string): string {
 
   // Keep SMS concise
   let message = `${emoji[alert.severity]} ${alert.severity.toUpperCase()}: ${alert.message}`;
-  
+
   if (productName && message.length < 100) {
     message += ` | ${productName}`;
   }
-  
+
   if (alert.shelfId && message.length < 130) {
     message += ` @ ${alert.shelfId}`;
   }
@@ -249,23 +249,23 @@ export async function getNotificationRecipients(
       collection(db, 'users'),
       where('warehouseId', '==', warehouseId)
     );
-    
+
     const snapshot = await getDocs(usersQuery);
     const recipients: NotificationRecipient[] = [];
 
     for (const doc of snapshot.docs) {
       const userData = doc.data();
-      
+
       // Check notification preferences
       const prefsDoc = await getDocs(
         query(collection(db, 'notificationPreferences'), where('userId', '==', doc.id))
       );
 
       let sendNotification = true;
-      
+
       if (!prefsDoc.empty) {
         const prefs = prefsDoc.docs[0].data() as NotificationPreferences;
-        
+
         // Skip if user only wants critical alerts and this isn't critical
         if (prefs.criticalOnly && alertSeverity !== 'critical') {
           sendNotification = false;
@@ -298,7 +298,7 @@ export async function sendAlertNotifications(
 ): Promise<{ emailsSent: number; smsSent: number }> {
   try {
     const recipients = await getNotificationRecipients(alert.warehouseId, alert.severity);
-    
+
     let emailsSent = 0;
     let smsSent = 0;
 
@@ -337,13 +337,58 @@ export async function sendAlertNotifications(
           console.error(`Failed to send SMS to ${recipient.phone}:`, error);
         }
       }
+
+      // Create In-App Notification (Always)
+      try {
+        await createInAppNotification({
+          userId: recipient.userId,
+          type: alert.severity === 'critical' ? 'error' : alert.severity === 'warning' ? 'warning' : 'info',
+          title: `${alert.severity.toUpperCase()}: ${alert.type.replace(/_/g, ' ').toUpperCase()}`,
+          message: alert.message,
+          link: alert.productId ? `/inventory?search=${alert.productId}` : alert.deviceId ? `/devices?search=${alert.deviceId}` : '/notifications',
+          metadata: {
+            alertId: alert.id,
+            warehouseId: alert.warehouseId,
+            shelfId: alert.shelfId,
+            productId: alert.productId,
+            deviceId: alert.deviceId,
+            originalType: alert.type
+          }
+        });
+      } catch (error) {
+        console.error(`Failed to create in-app notification for ${recipient.userId}:`, error);
+      }
     }
 
-    console.log(`Alert notifications sent: ${emailsSent} emails, ${smsSent} SMS`);
+    console.log(`Alert notifications sent: ${emailsSent} emails, ${smsSent} SMS, in-app notifications created`);
     return { emailsSent, smsSent };
   } catch (error) {
     console.error('Error sending alert notifications:', error);
     return { emailsSent: 0, smsSent: 0 };
+  }
+}
+
+/**
+ * Create an in-app notification document
+ */
+export async function createInAppNotification(params: {
+  userId: string;
+  type: 'info' | 'warning' | 'error' | 'success';
+  title: string;
+  message: string;
+  link?: string;
+  metadata?: any;
+}): Promise<string> {
+  try {
+    const docRef = await addDoc(collection(db, 'notifications'), {
+      ...params,
+      read: false,
+      createdAt: Timestamp.now(),
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error('Error creating in-app notification:', error);
+    throw error;
   }
 }
 

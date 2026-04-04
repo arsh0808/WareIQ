@@ -41,7 +41,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
     try {
       const result = await navigator.permissions.query({ name: 'camera' as PermissionName });
       setCameraPermission(result.state as any);
-      
+
       result.addEventListener('change', () => {
         setCameraPermission(result.state as any);
       });
@@ -55,9 +55,14 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       const devices = await Html5Qrcode.getCameras();
       setCameras(devices);
       if (devices.length > 0) {
-        
         const backCamera = devices.find(d => d.label.toLowerCase().includes('back'));
-        setSelectedCamera(backCamera?.id || devices[0].id);
+        const cameraToUse = backCamera?.id || devices[0].id;
+        setSelectedCamera(cameraToUse);
+
+        // Auto-start scanning once camera is selected
+        setTimeout(() => {
+          startScanning(cameraToUse);
+        }, 100);
       }
     } catch (error) {
       console.error('Error getting cameras:', error);
@@ -65,34 +70,35 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
     }
   };
 
-  const startScanning = async () => {
-    if (!selectedCamera) {
+  const startScanning = async (cameraId?: string) => {
+    const targetCamera = cameraId || selectedCamera;
+    if (!targetCamera) {
       toast.error('No camera selected', 'Please select a camera');
       return;
     }
 
     try {
       setScanning(true);
-      
+
       if (!scannerRef.current) {
         scannerRef.current = new Html5Qrcode('qr-reader');
       }
 
       await scannerRef.current.start(
-        selectedCamera,
+        targetCamera,
         {
           fps: 10,
           qrbox: { width: 250, height: 250 },
         },
         (decodedText) => {
-          
+
           toast.success('Code scanned!', decodedText);
           onScan(decodedText);
           stopScanning();
           onClose();
         },
         (errorMessage) => {
-          
+
         }
       );
     } catch (error) {
@@ -127,7 +133,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
 
       <DialogContent>
         <div className="space-y-4">
-          {}
+          { }
           {cameras.length > 1 && !scanning && (
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -147,26 +153,26 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
             </div>
           )}
 
-          {}
+          { }
           <div className="relative">
-            <div 
-              id="qr-reader" 
+            <div
+              id="qr-reader"
               className="w-full rounded-lg overflow-hidden bg-gray-900"
               style={{ minHeight: '300px' }}
             />
-            
+
             {!scanning && (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-900 rounded-lg">
                 <div className="text-center text-white">
-                  <Camera className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                  <p className="text-lg mb-4">Ready to scan</p>
+                  <Loader className="w-16 h-16 mx-auto mb-4 animate-spin text-blue-500" />
+                  <p className="text-lg mb-4">Connecting to camera...</p>
                   <Button
                     variant="primary"
-                    onClick={startScanning}
+                    onClick={() => startScanning()}
                     leftIcon={<Camera className="w-5 h-5" />}
                     disabled={!selectedCamera}
                   >
-                    Start Camera
+                    Retry Camera
                   </Button>
                 </div>
               </div>
@@ -182,7 +188,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
             )}
           </div>
 
-          {}
+          { }
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
             <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2 text-sm">
               Scanning Tips
@@ -195,7 +201,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
             </ul>
           </div>
 
-          {}
+          { }
           {cameraPermission === 'denied' && (
             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
               <p className="text-sm text-red-800 dark:text-red-200">
@@ -204,7 +210,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
             </div>
           )}
 
-          {}
+          { }
           <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
               Or enter code manually:
@@ -236,7 +242,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
             </div>
           </div>
 
-          {}
+          { }
           <Button
             variant="secondary"
             onClick={handleClose}

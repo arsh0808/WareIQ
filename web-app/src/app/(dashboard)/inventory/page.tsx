@@ -12,23 +12,33 @@ import { SearchInput } from '@/components/ui/SearchInput';
 import { Badge } from '@/components/ui/Badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
 import { TableSkeleton } from '@/components/ui/Skeleton';
-import { Package, AlertTriangle, CheckCircle, Filter, Upload, Download, Edit, Plus, Trash2, History } from 'lucide-react';
+import { Package, AlertTriangle, CheckCircle, Filter, Upload, Download, Edit, Plus, Trash2, History, RefreshCw } from 'lucide-react';
 import { BulkImportDialog } from '@/components/BulkImportDialog';
 import { AddProductDialog } from '@/components/AddProductDialog';
 import { EditInventoryDialog } from '@/components/EditInventoryDialog';
 import { AddInventoryDialog } from '@/components/AddInventoryDialog';
 import { BulkEditInventoryDialog } from '@/components/BulkEditInventoryDialog';
 import { InventoryHistoryDialog } from '@/components/InventoryHistoryDialog';
+import { TransferWizardDialog } from '@/components/TransferWizardDialog';
 import { exportToCSV } from '@/lib/utils/csvParser';
 import { toast } from '@/lib/hooks/useToast';
 import { trackInventoryDelete } from '@/lib/utils/inventoryHistory';
 import { usePermission } from '@/components/PermissionGuard';
+import { useData } from '@/lib/hooks/useData';
+import { formatDate, toDate } from '@/lib/utils/date';
 
 export default function InventoryPage() {
   const { user, userRole } = useAuth();
   const permissions = usePermission(userRole);
-  const [inventory, setInventory] = useState<Inventory[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
+  const inventoryQuery = query(
+    collection(db, 'inventory'),
+    where('warehouseId', '==', userRole?.warehouseId || 'wh-001')
+  );
+
+  const { data: inventory, loading: invLoading, isDemoData: isInvDemo } = useData<Inventory>('inventory', inventoryQuery);
+  const { data: products, isDemoData: isProdDemo } = useData<Product>('products', collection(db, 'products'));
+  const isDemo = isInvDemo || isProdDemo;
+
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'low' | 'out'>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -38,39 +48,13 @@ export default function InventoryPage() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showBulkEditDialog, setShowBulkEditDialog] = useState(false);
   const [showHistoryDialog, setShowHistoryDialog] = useState(false);
+  const [showTransferWizard, setShowTransferWizard] = useState(false);
   const [selectedInventoryItem, setSelectedInventoryItem] = useState<Inventory | null>(null);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    if (!userRole?.warehouseId) return;
-
-    const inventoryQuery = query(
-      collection(db, 'inventory'),
-      where('warehouseId', '==', userRole.warehouseId)
-    );
-    
-    const unsubInventory = onSnapshot(inventoryQuery, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Inventory[];
-      setInventory(data);
-      setLoading(false);
-    });
-
-    const unsubProducts = onSnapshot(collection(db, 'products'), (snapshot) => {
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Product[];
-      setProducts(data);
-    });
-
-    return () => {
-      unsubInventory();
-      unsubProducts();
-    };
-  }, [userRole]);
+    if (!invLoading) setLoading(false);
+  }, [invLoading]);
 
   const getProductName = (productId: string) => {
     const product = products.find(p => p.id === productId);
@@ -89,7 +73,7 @@ export default function InventoryPage() {
   };
 
   const filteredInventory = inventory.filter(item => {
-    
+
     let statusMatch = true;
     if (filter === 'low') statusMatch = item.quantity <= item.minStockLevel && item.quantity > 0;
     if (filter === 'out') statusMatch = item.quantity === 0;
@@ -102,7 +86,7 @@ export default function InventoryPage() {
       const query = searchQuery.toLowerCase();
       searchMatch = productName.includes(query) || productSku.includes(query) || shelfId.includes(query);
     }
-    
+
     return statusMatch && searchMatch;
   });
 
@@ -134,7 +118,7 @@ export default function InventoryPage() {
 
   const handleDeleteInventory = async (item: Inventory) => {
     if (!user) return;
-    
+
     if (!confirm(`Delete inventory for ${getProductName(item.productId)}?`)) {
       return;
     }
@@ -142,7 +126,7 @@ export default function InventoryPage() {
     try {
       // Track deletion before deleting
       await trackInventoryDelete(item.id, item, user.uid, undefined, 'Deleted via UI');
-      
+
       await deleteDoc(doc(db, 'inventory', item.id));
       toast.success('Inventory deleted', 'The inventory item has been removed');
     } catch (error: any) {
@@ -189,14 +173,14 @@ export default function InventoryPage() {
 
     try {
       const itemsToDelete = inventory.filter(i => selectedItems.has(i.id));
-      
+
       // Track deletions
       for (const item of itemsToDelete) {
         await trackInventoryDelete(item.id, item, user!.uid, undefined, 'Bulk delete via UI');
       }
 
       // Delete items
-      const promises = Array.from(selectedItems).map(id => 
+      const promises = Array.from(selectedItems).map(id =>
         deleteDoc(doc(db, 'inventory', id))
       );
 
@@ -212,27 +196,28 @@ export default function InventoryPage() {
   return (
     <PageWrapper allowedRoles={['admin', 'manager', 'staff']}>
       <div className="p-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                Inventory Management
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Track and manage your warehouse inventory
-              </p>
-            </div>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Inventory Management
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Track and manage your warehouse inventory
+            </p>
+          </div>
+          <div className="flex flex-col items-end gap-2">
             <div className="flex gap-2">
               {selectedItems.size > 0 && (
                 <>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     leftIcon={<Edit className="w-4 h-4" />}
                     onClick={handleBulkEdit}
                   >
                     Bulk Edit ({selectedItems.size})
                   </Button>
-                  <Button 
-                    variant="danger" 
+                  <Button
+                    variant="danger"
                     leftIcon={<Trash2 className="w-4 h-4" />}
                     onClick={handleBulkDelete}
                   >
@@ -240,23 +225,30 @@ export default function InventoryPage() {
                   </Button>
                 </>
               )}
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 leftIcon={<Upload className="w-4 h-4" />}
                 onClick={() => setShowImportDialog(true)}
               >
                 Import
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 leftIcon={<Download className="w-4 h-4" />}
                 onClick={handleExport}
                 disabled={filteredInventory.length === 0}
               >
                 Export
               </Button>
-              <Button 
-                variant="primary" 
+              <Button
+                variant="outline"
+                leftIcon={<RefreshCw className="w-4 h-4" />}
+                onClick={() => setShowTransferWizard(true)}
+              >
+                Transfer Stock
+              </Button>
+              <Button
+                variant="primary"
                 leftIcon={<Plus className="w-4 h-4" />}
                 onClick={() => setShowAddInventoryDialog(true)}
               >
@@ -264,265 +256,282 @@ export default function InventoryPage() {
               </Button>
             </div>
           </div>
+        </div>
 
-          {}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="flex-1">
-              <SearchInput
-                placeholder="Search by product, SKU, or shelf..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onClear={() => setSearchQuery('')}
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant={filter === 'all' ? 'primary' : 'outline'}
-                size="md"
-                onClick={() => setFilter('all')}
-              >
-                All Items
-              </Button>
-              <Button
-                variant={filter === 'low' ? 'primary' : 'outline'}
-                size="md"
-                onClick={() => setFilter('low')}
-                leftIcon={<AlertTriangle className="w-4 h-4" />}
-              >
-                Low Stock
-              </Button>
-              <Button
-                variant={filter === 'out' ? 'danger' : 'outline'}
-                size="md"
-                onClick={() => setFilter('out')}
-              >
-                Out of Stock
-              </Button>
-            </div>
+        { }
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="flex-1">
+            <SearchInput
+              placeholder="Search by product, SKU, or shelf..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onClear={() => setSearchQuery('')}
+            />
           </div>
+          <div className="flex gap-2">
+            <Button
+              variant={filter === 'all' ? 'primary' : 'outline'}
+              size="md"
+              onClick={() => setFilter('all')}
+            >
+              All Items
+            </Button>
+            <Button
+              variant={filter === 'low' ? 'primary' : 'outline'}
+              size="md"
+              onClick={() => setFilter('low')}
+              leftIcon={<AlertTriangle className="w-4 h-4" />}
+            >
+              Low Stock
+            </Button>
+            <Button
+              variant={filter === 'out' ? 'danger' : 'outline'}
+              size="md"
+              onClick={() => setFilter('out')}
+            >
+              Out of Stock
+            </Button>
+          </div>
+        </div>
 
-          {loading ? (
-            <Card className="p-6">
-              <TableSkeleton rows={8} />
-            </Card>
-          ) : filteredInventory.length === 0 ? (
-            <Card className="p-12 text-center">
-              <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 dark:text-gray-400 text-lg">
-                {searchQuery ? 'No inventory items match your search.' : 'No inventory items found.'}
-              </p>
-            </Card>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">
-                    <input
-                      type="checkbox"
-                      checked={selectedItems.size === filteredInventory.length && filteredInventory.length > 0}
-                      onChange={toggleSelectAll}
-                      className="rounded border-gray-300 dark:border-gray-600"
-                    />
-                  </TableHead>
-                  <TableHead>Product</TableHead>
-                  <TableHead>SKU</TableHead>
-                  <TableHead>Quantity</TableHead>
-                  <TableHead>Min/Max</TableHead>
-                  <TableHead>Shelf</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredInventory.map((item) => {
-                  const status = getStockStatus(item);
-                  const product = products.find(p => p.id === item.productId);
-                  const isSelected = selectedItems.has(item.id);
-                  return (
-                    <TableRow key={item.id} className={isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''}>
-                      <TableCell>
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => toggleItemSelection(item.id)}
-                          className="rounded border-gray-300 dark:border-gray-600"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <div className="font-medium text-gray-900 dark:text-white">
-                          {getProductName(item.productId)}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-gray-500 dark:text-gray-400 font-mono text-sm">
-                          {getProductSku(item.productId)}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="font-semibold">{item.quantity}</span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-gray-500 dark:text-gray-400">
-                          {item.minStockLevel} / {item.maxStockLevel}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="default">{item.shelfId}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant={
-                            item.quantity === 0 ? 'danger' :
+        {loading ? (
+          <Card className="p-6">
+            <TableSkeleton rows={8} />
+          </Card>
+        ) : filteredInventory.length === 0 ? (
+          <Card className="p-12 text-center">
+            <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500 dark:text-gray-400 text-lg">
+              {searchQuery ? 'No inventory items match your search.' : 'No inventory items found.'}
+            </p>
+          </Card>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12">
+                  <input
+                    type="checkbox"
+                    checked={selectedItems.size === filteredInventory.length && filteredInventory.length > 0}
+                    onChange={toggleSelectAll}
+                    className="rounded border-gray-300 dark:border-gray-600"
+                  />
+                </TableHead>
+                <TableHead>Product</TableHead>
+                <TableHead>SKU</TableHead>
+                <TableHead>Quantity</TableHead>
+                <TableHead>Min/Max</TableHead>
+                <TableHead>Shelf</TableHead>
+                <TableHead>Batch</TableHead>
+                <TableHead>Expiry</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredInventory.map((item) => {
+                const status = getStockStatus(item);
+                const product = products.find(p => p.id === item.productId);
+                const isSelected = selectedItems.has(item.id);
+                return (
+                  <TableRow key={item.id} className={isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''}>
+                    <TableCell>
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleItemSelection(item.id)}
+                        className="rounded border-gray-300 dark:border-gray-600"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-medium text-gray-900 dark:text-white">
+                        {getProductName(item.productId)}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-gray-500 dark:text-gray-400 font-mono text-sm">
+                        {getProductSku(item.productId)}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="font-semibold">{item.quantity}</span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-gray-500 dark:text-gray-400">
+                        {item.minStockLevel} / {item.maxStockLevel}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="default">{item.shelfId}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm font-mono">{item.batchNumber || '-'}</span>
+                    </TableCell>
+                    <TableCell>
+                      <span className={`text-sm ${item.expiryDate && toDate(item.expiryDate)!.getTime() < Date.now() ? 'text-red-600 font-bold' : ''}`}>
+                        {item.expiryDate ? formatDate(item.expiryDate) : '-'}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          item.quantity === 0 ? 'danger' :
                             item.quantity <= item.minStockLevel ? 'warning' :
-                            'success'
-                          }
+                              'success'
+                        }
+                      >
+                        {item.quantity === 0 && <AlertTriangle className="w-3 h-3 mr-1" />}
+                        {item.quantity > 0 && item.quantity <= item.minStockLevel && <AlertTriangle className="w-3 h-3 mr-1" />}
+                        {item.quantity > item.minStockLevel && <CheckCircle className="w-3 h-3 mr-1" />}
+                        {status.text}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          leftIcon={<History className="w-4 h-4" />}
+                          onClick={() => handleViewHistory(item)}
+                          title="View History"
                         >
-                          {item.quantity === 0 && <AlertTriangle className="w-3 h-3 mr-1" />}
-                          {item.quantity > 0 && item.quantity <= item.minStockLevel && <AlertTriangle className="w-3 h-3 mr-1" />}
-                          {item.quantity > item.minStockLevel && <CheckCircle className="w-3 h-3 mr-1" />}
-                          {status.text}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            leftIcon={<History className="w-4 h-4" />}
-                            onClick={() => handleViewHistory(item)}
-                            title="View History"
-                          >
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            leftIcon={<Edit className="w-4 h-4" />}
-                            onClick={() => handleEditInventory(item)}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            leftIcon={<Trash2 className="w-4 h-4" />}
-                            onClick={() => handleDeleteInventory(item)}
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          )}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          leftIcon={<Edit className="w-4 h-4" />}
+                          onClick={() => handleEditInventory(item)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          leftIcon={<Trash2 className="w-4 h-4" />}
+                          onClick={() => handleDeleteInventory(item)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        )}
 
-          {}
-          <div className="grid md:grid-cols-3 gap-6 mt-6">
-            <Card className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                    Total Items
-                  </p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                    {inventory.length}
-                  </p>
-                </div>
-                <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                  <Package className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-                </div>
+        { }
+        <div className="grid md:grid-cols-3 gap-6 mt-6">
+          <Card className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Total Items
+                </p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                  {inventory.length}
+                </p>
               </div>
-            </Card>
-            <Card className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                    Low Stock Items
-                  </p>
-                  <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
-                    {inventory.filter(i => i.quantity <= i.minStockLevel && i.quantity > 0).length}
-                  </p>
-                </div>
-                <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
-                  <AlertTriangle className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
-                </div>
+              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                <Package className="w-8 h-8 text-blue-600 dark:text-blue-400" />
               </div>
-            </Card>
-            <Card className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                    Out of Stock
-                  </p>
-                  <p className="text-3xl font-bold text-red-600 dark:text-red-400">
-                    {inventory.filter(i => i.quantity === 0).length}
-                  </p>
-                </div>
-                <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-lg">
-                  <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
-                </div>
+            </div>
+          </Card>
+          <Card className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Low Stock Items
+                </p>
+                <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
+                  {inventory.filter(i => i.quantity <= i.minStockLevel && i.quantity > 0).length}
+                </p>
               </div>
-            </Card>
-          </div>
+              <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+                <AlertTriangle className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
+              </div>
+            </div>
+          </Card>
+          <Card className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Out of Stock
+                </p>
+                <p className="text-3xl font-bold text-red-600 dark:text-red-400">
+                  {inventory.filter(i => i.quantity === 0).length}
+                </p>
+              </div>
+              <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
+              </div>
+            </div>
+          </Card>
+        </div>
 
-          {/* Dialogs */}
-          {userRole?.warehouseId && user && (
-            <>
-              <BulkImportDialog
-                open={showImportDialog}
-                onClose={() => setShowImportDialog(false)}
-                warehouseId={userRole.warehouseId}
-              />
-              <AddProductDialog
-                open={showAddProductDialog}
-                onClose={() => setShowAddProductDialog(false)}
-                warehouseId={userRole.warehouseId}
-              />
-              <AddInventoryDialog
-                open={showAddInventoryDialog}
-                onClose={() => setShowAddInventoryDialog(false)}
-                warehouseId={userRole.warehouseId}
-                userId={user.uid}
-              />
-              {selectedInventoryItem && (
-                <>
-                  <EditInventoryDialog
-                    open={showEditDialog}
-                    onClose={() => {
-                      setShowEditDialog(false);
-                      setSelectedInventoryItem(null);
-                    }}
-                    inventoryItem={selectedInventoryItem}
-                    product={products.find(p => p.id === selectedInventoryItem.productId)}
-                    userId={user.uid}
-                  />
-                  <InventoryHistoryDialog
-                    open={showHistoryDialog}
-                    onClose={() => {
-                      setShowHistoryDialog(false);
-                      setSelectedInventoryItem(null);
-                    }}
-                    inventoryId={selectedInventoryItem.id}
-                    product={products.find(p => p.id === selectedInventoryItem.productId)}
-                  />
-                </>
-              )}
-              {selectedItems.size > 0 && (
-                <BulkEditInventoryDialog
-                  open={showBulkEditDialog}
+        {/* Dialogs */}
+        {userRole?.warehouseId && user && (
+          <>
+            <BulkImportDialog
+              open={showImportDialog}
+              onClose={() => setShowImportDialog(false)}
+              warehouseId={userRole.warehouseId}
+            />
+            <AddProductDialog
+              open={showAddProductDialog}
+              onClose={() => setShowAddProductDialog(false)}
+              warehouseId={userRole.warehouseId}
+            />
+            <AddInventoryDialog
+              open={showAddInventoryDialog}
+              onClose={() => setShowAddInventoryDialog(false)}
+              warehouseId={userRole.warehouseId}
+              userId={user.uid}
+            />
+            {selectedInventoryItem && (
+              <>
+                <EditInventoryDialog
+                  open={showEditDialog}
                   onClose={() => {
-                    setShowBulkEditDialog(false);
-                    setSelectedItems(new Set());
+                    setShowEditDialog(false);
+                    setSelectedInventoryItem(null);
                   }}
-                  selectedItems={inventory.filter(i => selectedItems.has(i.id))}
-                  products={products}
+                  inventoryItem={selectedInventoryItem}
+                  product={products.find(p => p.id === selectedInventoryItem.productId)}
                   userId={user.uid}
                 />
-              )}
-            </>
-          )}
+                <InventoryHistoryDialog
+                  open={showHistoryDialog}
+                  onClose={() => {
+                    setShowHistoryDialog(false);
+                    setSelectedInventoryItem(null);
+                  }}
+                  inventoryId={selectedInventoryItem.id}
+                  product={products.find(p => p.id === selectedInventoryItem.productId)}
+                />
+              </>
+            )}
+            <TransferWizardDialog
+              open={showTransferWizard}
+              onClose={() => setShowTransferWizard(false)}
+              userId={user.uid}
+              sourceWarehouseId={userRole.warehouseId}
+            />
+            {selectedItems.size > 0 && (
+              <BulkEditInventoryDialog
+                open={showBulkEditDialog}
+                onClose={() => {
+                  setShowBulkEditDialog(false);
+                  setSelectedItems(new Set());
+                }}
+                selectedItems={inventory.filter(i => selectedItems.has(i.id))}
+                products={products}
+                userId={user.uid}
+              />
+            )}
+          </>
+        )}
       </div>
     </PageWrapper>
   );

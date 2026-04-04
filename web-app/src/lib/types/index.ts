@@ -66,6 +66,8 @@ export interface Product {
   barcode: string;
   qrCode: string;
   imageURL: string;
+  expiryDate?: Timestamp | Date; // Default/Sample expiry
+  batchNumber?: string;
   createdAt: Timestamp | Date;
   updatedAt: Timestamp | Date;
 }
@@ -82,6 +84,8 @@ export interface Inventory {
   lastUpdated?: Timestamp | Date;
   updatedBy?: string;
   status?: 'available' | 'reserved' | 'damaged';
+  expiryDate?: Timestamp | Date;
+  batchNumber?: string;
 }
 
 export type DeviceType = 'weight_sensor' | 'rfid_reader' | 'temperature_sensor' | 'camera';
@@ -104,11 +108,11 @@ export interface IoTDevice {
   updatedAt: Timestamp | Date;
 }
 
-export type AlertType = 
-  | 'low_stock' 
-  | 'sensor_failure' 
-  | 'unauthorized_access' 
-  | 'temperature_alert' 
+export type AlertType =
+  | 'low_stock'
+  | 'sensor_failure'
+  | 'unauthorized_access'
+  | 'temperature_alert'
   | 'weight_mismatch'
   | 'low_battery';
 

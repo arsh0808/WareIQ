@@ -42,19 +42,19 @@ export default function Home() {
               Next-Gen IoT Inventory Management
             </span>
           </div>
-          
+
           <h1 className="text-6xl md:text-7xl lg:text-8xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight">
             Transform Your
             <span className="block bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
               Warehouse Operations
             </span>
           </h1>
-          
+
           <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
-            Real-time inventory tracking with IoT sensors, smart shelves, and AI-powered analytics. 
+            Real-time inventory tracking with IoT sensors, smart shelves, and AI-powered analytics.
             Streamline operations and boost efficiency by up to 50%.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
               href="/login"
@@ -186,7 +186,7 @@ export default function Home() {
               Leveraging the best tools for performance, security, and scalability
             </p>
           </div>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             <TechBadge name="Next.js" color="bg-black dark:bg-white dark:text-black" />
             <TechBadge name="Firebase" color="bg-yellow-500" />
@@ -279,7 +279,7 @@ export default function Home() {
               Next-generation IoT-driven warehouse management system.
             </p>
           </div>
-          
+
           <div>
             <h3 className="font-bold text-gray-900 dark:text-white mb-4">Product</h3>
             <ul className="space-y-2 text-sm">
@@ -289,7 +289,7 @@ export default function Home() {
               <li><Link href="/inventory" className="text-gray-600 dark:text-gray-400 hover:text-blue-600">Inventory</Link></li>
             </ul>
           </div>
-          
+
           <div>
             <h3 className="font-bold text-gray-900 dark:text-white mb-4">Company</h3>
             <ul className="space-y-2 text-sm">
@@ -299,7 +299,7 @@ export default function Home() {
               <li><a href="#" className="text-gray-600 dark:text-gray-400 hover:text-blue-600">Terms</a></li>
             </ul>
           </div>
-          
+
           <div>
             <h3 className="font-bold text-gray-900 dark:text-white mb-4">Contact</h3>
             <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
@@ -309,7 +309,7 @@ export default function Home() {
             </ul>
           </div>
         </div>
-        
+
         <div className="pt-8 border-t border-gray-200 dark:border-gray-700 text-center text-sm text-gray-600 dark:text-gray-400">
           <p>&copy; 2026 Smart Warehouse System. All rights reserved. Built with ❤️ using Next.js & Firebase.</p>
         </div>
@@ -390,9 +390,8 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
         </svg>
       </button>
       <div
-        className={`px-6 overflow-hidden transition-all duration-300 ${
-          isOpen ? 'max-h-96 py-4' : 'max-h-0'
-        }`}
+        className={`px-6 overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-96 py-4' : 'max-h-0'
+          }`}
       >
         <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{answer}</p>
       </div>
