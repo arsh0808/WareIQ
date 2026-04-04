@@ -53,12 +53,29 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
   const getCameras = async () => {
     try {
       try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          toast.error('Secure Connection Required', 'Cameras require HTTPS or localhost. If you are using an IP address (like 192.168.x.x), you must use HTTPS.');
+          setCameraPermission('denied');
+          return;
+        }
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         stream.getTracks().forEach(track => track.stop());
         setCameraPermission('granted');
-      } catch (permissionError) {
-        console.warn('Manual getUserMedia failed, permission might be denied', permissionError);
+      } catch (permissionError: any) {
+        console.warn('Manual getUserMedia failed', permissionError);
+
+        if (permissionError.name === 'NotAllowedError') {
+          toast.error('Permission Blocked', 'The browser settings have explicitly set camera to Blocked.');
+        } else if (permissionError.name === 'NotFoundError') {
+          toast.error('No Camera Found', 'The OS reports exactly 0 cameras connected or active.');
+        } else if (permissionError.name === 'NotReadableError') {
+          toast.error('Camera In Use', 'Another app (Zoom, Teams, etc) is already holding the camera lock!');
+        } else {
+          toast.error('Hardware Error', `${permissionError.name}: ${permissionError.message}`);
+        }
+
         setCameraPermission('denied');
+        return; // Don't proceed to getCameras if getting base permission fundamentally crashes
       }
 
       const devices = await Html5Qrcode.getCameras();
