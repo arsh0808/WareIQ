@@ -65,7 +65,9 @@ export default function AnalyticsPage() {
           products,
           warehouseUtil,
           itemsTrend,
-          valueTrend
+          valueTrend,
+          salesData,
+          runway
         ] = await Promise.all([
           getInventoryTrends(userRole.warehouseId, days),
           getActivityMetrics(userRole.warehouseId, days),
@@ -460,8 +462,8 @@ export default function AnalyticsPage() {
                         </td>
                         <td className="px-4 py-3">
                           <span className={`px-2 py-1 text-xs font-semibold rounded-full ${item.runwayDays < 14 ? 'bg-red-100 text-red-800' :
-                              item.runwayDays < 30 ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-green-100 text-green-800'
+                            item.runwayDays < 30 ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-green-100 text-green-800'
                             }`}>
                             {item.runwayDays < 14 ? 'Urgent Restock' : item.runwayDays < 30 ? 'Restock Soon' : 'Healthy'}
                           </span>
