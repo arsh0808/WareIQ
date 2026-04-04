@@ -52,6 +52,15 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
 
   const getCameras = async () => {
     try {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        stream.getTracks().forEach(track => track.stop());
+        setCameraPermission('granted');
+      } catch (permissionError) {
+        console.warn('Manual getUserMedia failed, permission might be denied', permissionError);
+        setCameraPermission('denied');
+      }
+
       const devices = await Html5Qrcode.getCameras();
       setCameras(devices);
       if (devices.length > 0) {
@@ -134,10 +143,11 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       <DialogContent>
         <div className="space-y-4">
           { }
-          {cameras.length > 1 && !scanning && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Select Camera
+          {/* Always show camera selector when multiple cameras exist */}
+          {cameras.length > 1 && (
+            <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                Select Active Camera
               </label>
               <select
                 value={selectedCamera}
@@ -149,7 +159,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
                     setTimeout(() => startScanning(newCamera), 100);
                   }
                 }}
-                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
               >
                 {cameras.map((camera) => (
                   <option key={camera.id} value={camera.id}>
